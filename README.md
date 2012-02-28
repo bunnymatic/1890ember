@@ -1,3 +1,3 @@
-*Don't clone this repo, download instead!*
+# 1890 Bryant
 
-[https://github.com/emberjs/starter-kit/downloads]
+Attempting to replace the current site with an ember impl that grabs artist data from Mission Artists United json endpoints.
