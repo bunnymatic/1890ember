@@ -1,7 +1,6 @@
-var App = Em.Application.create();
 
-App.MyView = Em.View.extend({
-  mouseDown: function() {
-    window.alert("hello world!");
-  }
+var App = Ember.Application.create();
+
+App.MyView = Ember.View.extend({
+  
 });

@@ -1,0 +1,1 @@
+ARTIST: {{artist.fullname}}
