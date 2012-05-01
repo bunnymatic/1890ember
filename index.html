@@ -39,6 +39,8 @@
   </script>
   <script type="text/x-handlebars" data-template-name='artist-view'>
     ARTIST: {{artist.artist.firstname}} {{artist.artist.lastname}}
+    img: {{artist.artist.profile_image}}
+    <img {{bindAttr src="artist.artist.profile_image"}}>
   </script>
   <script type="text/x-handlebars" data-template-name='main'>
     {{#view App.MyView}}
