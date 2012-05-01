@@ -1,5 +1,5 @@
 <div class='artists'>
 {{#each artists}}
-    {{view App.ShowArtistView artistBinding="this"}}
+    {{view App.ArtistShowView artistBinding="this"}}
 {{/each}}
 </div>

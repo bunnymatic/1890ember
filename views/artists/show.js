@@ -1,4 +1,4 @@
-App.ShowContactView = Ember.View.extend({
-  templateName: 'templates/artists/show',
+App.ArtistShowView = Ember.View.extend({
+  templateName: 'artist-view',
   classNames: ['artist']
 });

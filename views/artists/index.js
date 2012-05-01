@@ -1,5 +1,5 @@
 App.ArtistIndexView = Ember.View.extend({
-  templateName: 'templates/artists/index',
+  templateName: 'artists-view',
   artistsBinding: 'App.artistsController',
   refreshListing: function() {
     App.artistsController.findAll();
