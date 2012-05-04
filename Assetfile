@@ -1,6 +1,29 @@
 # All of rake-pipeline's web goodness lives here.
-require "rake-pipeline-web-filters"
 require "json"
+require "rake-pipeline-web-filters"
+
+# shamelessly ripped from https://github.com/interline/ember-skeleton/blob/master/Assetfile
+class LoaderFilter < Web::Filters::MinispadeFilter
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      code = input.read
+      module_id = @module_id_generator.call(input)
+      contents = "function(require) {\n#{code}\n}"
+      ret = "\nloader.register('#{module_id}', #{contents});\n"
+      output.write ret
+    end
+  end
+end
+
+class HandlebarsFilter < Filter
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      code = input.read.to_json
+      name = File.basename(input.path, '.handlebars')
+      output.write "\nreturn Ember.Handlebars.compile(#{code});\n"
+    end
+  end
+end
 
 # All of our outputs will be relative to the `public/`
 # directory.
@@ -19,14 +42,22 @@ input "app" do
   # Here we specify a match block so we can apply a filter to
   # a subset of the files in our input directory. We're turning
   # our handlebars template files into javascript files.
-  match "**/*.hb" do
-    handlebars
+  match 'templates/**/*.handlebars' do
+    filter HandlebarsFilter
+    filter LoaderFilter,
+      :module_id_generator => proc { |input|
+      input.path.sub(/^templates\//, "#{APPNAME}/~templates/").sub(/\.handlebars$/, '')
+      }
+    if ENV['RAKEP_MODE'] == 'production'
+      uglify {|input| input}
+    end
+    concat 'app.js'
   end
 
   # Now we match all the rest of the JavaScript files. Because the
   # outputs of our handlebars filter are JavaScript files, those
   # will get matched by this block, too.
-  match "lib/**/*.js" do
+  match "js/**/*.js, models/**/*.js, controllers/**/*.js, views/**/*.js" do
     # The minispade helper wraps each JS file in some code to
     # register it with the [minispade](https://github.com/wycats/minispade)
     # module loader.
@@ -42,7 +73,7 @@ input "app" do
       # So using minispade, we can write:
       #    minispade.require('todos/vendor/ember');
       # in our JS when we want to load ember.js.
-      input.path.sub(/lib\//, 'todos/').sub(/\.js$/, '')
+      #input.path.sub(/lib\//, 'todos/').sub(/\.js$/, '')
     }
 
     # After being wrapped in the minispade code, we want to concatenate
@@ -54,14 +85,14 @@ input "app" do
   # Sass's `@import` statement to control the order in which our
   # stylesheets get loaded, so we only match a single master
   # .scss file, and use `@import` from there to load the rest.
-  match "css/todos.scss" do
+  match "scss/*.scss" do
     # The `:additional_load_paths` option lets us tell Sass that
     # it should look in our styles directory to find `@import`s.
     scss :additional_load_paths => "app/css"
 
     # We're only matching a single file here, but we want it to
     # end up in our css/ directory.
-    copy "css/todos.css"
+    concat 'css/all.css'
   end
 
   # Finally, we keep our static assets that don't need any processing
